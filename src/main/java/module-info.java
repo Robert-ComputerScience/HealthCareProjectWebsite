@@ -1,16 +1,17 @@
 module com.example.healthcareprojectwebsite {
+    // Standard JavaFX
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.web;
 
-    requires org.controlsfx.controls;
-    requires com.dlsc.formsfx;
-    requires net.synedra.validatorfx;
-    requires org.kordamp.ikonli.javafx;
-    requires org.kordamp.bootstrapfx.core;
-    requires eu.hansolo.tilesfx;
-    requires com.almasb.fxgl.all;
+    // Firebase and Google Cloud
+    requires firebase.admin;
+    requires google.cloud.firestore;
+    requires com.google.auth;
+    requires com.google.api.apicommon;
+    requires google.cloud.core;
 
-    opens com.example.healthcareprojectwebsite to javafx.fxml;
+    // Open the package to JavaFX for FXML and Firebase for Reflection
+    opens com.example.healthcareprojectwebsite to javafx.fxml, google.cloud.firestore;
     exports com.example.healthcareprojectwebsite;
 }

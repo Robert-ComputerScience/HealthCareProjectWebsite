@@ -1,11 +1,8 @@
 package com.example.healthcareprojectwebsite;
 
-
-
-import com.example.healthcare.models.Patient;
-import com.example.healthcare.services.FirebaseService;
+import com.example.healthcareprojectwebsite.Patient;
+import com.example.healthcareprojectwebsite.FirebaseService;
 import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.WriteResult;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -14,8 +11,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class DashboardController {
@@ -30,12 +25,10 @@ public class DashboardController {
 
     @FXML
     public void initialize() {
-        // Initialize columns
         colFirstName.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         colLastName.setCellValueFactory(new PropertyValueFactory<>("lastName"));
         colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
 
-        // Initialize Firebase Connection (Do this in main app usually, but here for demo)
         FirebaseService.initialize();
     }
 
@@ -45,16 +38,21 @@ public class DashboardController {
         String lName = lNameField.getText();
         String email = emailField.getText();
 
-        if (fName.isEmpty() || lName.isEmpty() || email.isEmpty()) {
+        if (fName.trim().isEmpty() || lName.trim().isEmpty() || email.trim().isEmpty()) {
             showAlert("Error", "Please fill in all fields.");
             return;
         }
 
-        // 1. Update UI immediately (Optimistic UI update)
-        Patient newPatient = new Patient(fName, lName, email, "No history");
+        // 1. Generate the ID first (The 5th argument)
+        String docId = UUID.randomUUID().toString();
+
+        // 2. Pass all 5 arguments to match the Patient class constructor
+        Patient newPatient = new Patient(docId, fName, lName, email, "No history");
+
+        // Update UI
         patientTable.getItems().add(newPatient);
 
-        // 2. Send to Firebase in Background
+        // 3. Send to Firebase
         addDataToFirebase(newPatient);
 
         // 3. Clear fields
@@ -64,25 +62,19 @@ public class DashboardController {
     }
 
     private void addDataToFirebase(Patient patient) {
-        // Create a Map for Firestore
-        Map<String, Object> data = new HashMap<>();
-        data.put("firstName", patient.getFirstName());
-        data.put("lastName", patient.getLastName());
-        data.put("email", patient.getEmail());
-        data.put("medicalHistory", "New Patient Entry");
+        // Use the ID already stored in the patient object
+        ApiFuture<WriteResult> result = FirebaseService.getFirestore()
+                .collection("patients")
+                .document(patient.getId())
+                .set(patient);
 
-        // Generate a random ID for the document
-        String docId = UUID.randomUUID().toString();
-
-        // Async write to Firestore "patients" collection
-        ApiFuture<WriteResult> result = FirebaseService.getFirestore().collection("patients").document(docId).set(data);
-
-        System.out.println("Patient sent to database. Update time: " + result.toString());
+        System.out.println("Patient " + patient.getFirstName() + " pushed to Firestore.");
     }
 
     private void showAlert(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
+        alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
     }

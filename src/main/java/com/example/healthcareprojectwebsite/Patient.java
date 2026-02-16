@@ -1,7 +1,9 @@
 package com.example.healthcareprojectwebsite;
 
-
-
+/**
+ * Model class representing a Patient.
+ * Designed for JavaFX TableView and Firebase Firestore integration.
+ */
 public class Patient {
     private String id;
     private String firstName;
@@ -9,16 +11,23 @@ public class Patient {
     private String email;
     private String medicalHistorySummary;
 
-    public Patient() {} // Empty constructor for Firebase
+    // 1. MUST HAVE: Empty constructor for Firebase to reconstruct objects from the cloud
+    public Patient() {}
 
-    public Patient(String firstName, String lastName, String email, String history) {
+    // 2. Main Constructor: Used by your DashboardController to create new patients
+    public Patient(String id, String firstName, String lastName, String email, String history) {
+        this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.medicalHistorySummary = history;
     }
 
-    // Getters and Setters are required for Firebase to map data automatically
+    // 3. GETTERS & SETTERS: Required for JavaFX PropertyValueFactory and Firebase Mapping
+
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }
 
